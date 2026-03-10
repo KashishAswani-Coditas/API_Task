@@ -1,7 +1,6 @@
 package com.example.JDBC_Assignment.dao;
 
 import com.example.JDBC_Assignment.entity.Staff;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -10,27 +9,35 @@ import java.util.List;
 
 @Repository
 public class StaffDao {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+
+    private final JdbcTemplate jdbcTemplate;
+    //constructor based injection
+    public StaffDao(JdbcTemplate jdbcTemplate){
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    String selectQuery = "SELECT * FROM staff ";
 
     //1
-    public List<Staff> getAllStaff() {
-        String sql = "SELECT * FROM staff";
-        List<Staff> staffList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Staff.class));
-        return staffList;
+    public List<Staff> getAllStaff(int page, int size) {
+        int offset = (page - 1)*size;
+
+        String sql = selectQuery + "LIMIT ?, ?";
+
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Staff.class), offset, size);
     }
 
     //2
-    public List<Staff> getStaffWithID3() {
-        String sql = "SELECT * FROM staff WHERE staffid = 3";
-        List<Staff> staffList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Staff.class));
-        return staffList;
+    public Staff getStaffWithId(int id) {
+        String sql = selectQuery + " WHERE staffid = %d".formatted(id);
+        return jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(Staff.class));
     }
 
     //3
-    public int insertStaff(Staff staff) {
-        return jdbcTemplate.update(
-                "INSERT INTO staff VALUES (?,?,?,?,?)",
+    public void insertStaff(Staff staff) {
+         jdbcTemplate.update(
+                "INSERT INTO staff (staffid,name,profile,salary,experience)\n" +
+                        "VALUES (?,?,?,?,?)",
                 staff.getStaffId(),
                 staff.getName(),
                 staff.getProfile(),
@@ -40,23 +47,22 @@ public class StaffDao {
     }
 
     //4
-    public List<Staff> getStaffWithSalaryGreaterThan20k() {
-        String sql = "SELECT * FROM staff WHERE salary > 20000";
+    public List<Staff> getStaffWithSalaryGreaterThanX(int salary) {
+        String sql = selectQuery + " WHERE salary > " + salary;
         List<Staff> staffList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Staff.class));
-
         return staffList;
     }
 
     //5
-    public List<Staff> getStaffWithExp10To20() {
-        String sql = "SELECT * FROM staff WHERE experience BETWEEN 10 AND 20";
+    public List<Staff> getStaffWithExpStartToEnd(int start, int end) {
+        String sql = selectQuery + " WHERE experience BETWEEN %d AND %d".formatted(start, end);
         List<Staff> staffList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Staff.class));
         return staffList;
     }
 
     //6
     public Staff maxSalaryStaff() {
-        String sql = "SELECT * FROM staff WHERE salary = (SELECT MAX(salary) FROM staff)";
+        String sql = selectQuery+ " WHERE salary = (SELECT MAX(salary) FROM staff)";
         Staff s = jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(Staff.class));
         return s;
     }
@@ -69,28 +75,25 @@ public class StaffDao {
     }
 
     //8
-    public String getStaffNameWithMinExperience() {
-        String sql = "SELECT name FROM staff WHERE experience = (SELECT MIN(experience) FROM staff)";
-        String name = jdbcTemplate.queryForObject(sql, String.class);
-        return name;
+    public List<Staff> getStaffNameWithMinExperience() {
+        String sql = selectQuery + " WHERE experience = (SELECT MIN(experience) FROM staff)";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Staff.class));
     }
 
     //9
-    public List<Staff> staffProfileTrainer() {
-        String sql = "SELECT * FROM staff WHERE profile = 'Trainer'";
+    public List<Staff> staffByProfile(String profile) {
+        String sql = selectQuery + " WHERE profile = '%s'".formatted(profile) ;
 
-        List<Staff> staffList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Staff.class));
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Staff.class));
 
-        return staffList;
     }
 
     //10
-    public List<Staff> staffProfileNotTrainer() {
-        String sql = "SELECT * FROM staff WHERE profile != 'Trainer'";
+    public List<Staff> staffProfileNotX(String profile) {
+        String sql = selectQuery+ " WHERE profile != '%s' ".formatted(profile);
 
-        List<Staff> staffList = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Staff.class));
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Staff.class));
 
-        return staffList;
     }
 
 }

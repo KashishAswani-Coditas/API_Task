@@ -2,40 +2,44 @@ package com.example.JDBC_Assignment.service;
 
 import com.example.JDBC_Assignment.dao.StaffDao;
 import com.example.JDBC_Assignment.entity.Staff;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class StaffService {
-    @Autowired
-    private StaffDao staffDao;
+
+    private final StaffDao staffDao;
+    //constructor based injection
+    public StaffService(StaffDao staffDao){
+        this.staffDao = staffDao;
+    }
+
 
     //1
-    public List<Staff> getAllStaff() {
-        return staffDao.getAllStaff();
+    public List<Staff> getAllStaff(int page, int size) {
+        return staffDao.getAllStaff(page, size);
 
     }
 
     //2
-    public List<Staff> getStaffWithID3(){
-        return staffDao.getStaffWithID3();
+    public Staff getStaffWithId(int id){
+        return staffDao.getStaffWithId(id);
     }
 
     //3
-    public int insertStaff(Staff staff){
-        return staffDao.insertStaff(staff);
+    public void insertStaff(Staff staff){
+         staffDao.insertStaff(staff);
     }
 
     //4
-    public List<Staff> getStaffWithSalaryGreaterThan20k(){
-        return staffDao.getStaffWithSalaryGreaterThan20k();
+    public List<Staff> getStaffWithSalaryGreaterThanX(int salary){
+        return staffDao.getStaffWithSalaryGreaterThanX(salary);
     }
 
     //5
-    public List<Staff> getStaffWithExp10To20(){
-        return staffDao.getStaffWithExp10To20();
+    public List<Staff> getStaffWithExpStartToEnd(int start, int end){
+        return staffDao.getStaffWithExpStartToEnd(start, end);
     }
 
     //6
@@ -49,17 +53,17 @@ public class StaffService {
     }
 
     //8
-    public String getStaffNameWithMinExperience(){
+    public List<Staff> getStaffNameWithMinExperience(){
         return staffDao.getStaffNameWithMinExperience();
     }
 
     //9
-    public List<Staff> staffProfileTrainer(){
-        return staffDao.staffProfileTrainer();
+    public List<Staff> staffByProfile(String profile){
+        return staffDao.staffByProfile(profile);
     }
 
     //10
-    public List<Staff> staffProfileNotTrainer(){
-        return staffDao.staffProfileNotTrainer();
+    public List<Staff> staffProfileNotX(String profile){
+        return staffDao.staffProfileNotX(profile);
     }
 }
